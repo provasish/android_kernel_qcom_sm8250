@@ -104,14 +104,32 @@ static int sec_enable_black_gesture(struct chip_data_s6sy792 *chip_info, bool en
 {
     int ret = 0;
     int i = 0;
+	bool single_tap_support_b = 0;
+	bool ear_sense_support_b = 0;
+	struct touchpanel_data *ts = i2c_get_clientdata(chip_info->client);
 
-    TPD_INFO("%s, enable = %d\n", __func__, enable);
+	if (ts) {
+		single_tap_support_b = ts->single_tap_support;
+		ear_sense_support_b = ts->ear_sense_support;
+	}
+
+	TPD_INFO(
+		"%s, enable = %d,single_tap_support_b = %d,ear_sense_support_b =%d\n",
+		__func__, enable, single_tap_support_b, ear_sense_support_b);
 
     if (enable) {
 	if (chip_info->black_gesture_indep) {
 		touch_i2c_write_word(chip_info->client, SEC_CMD_WAKEUP_GESTURE_MODE, chip_info->gesture_state);
 	} else {
-        	touch_i2c_write_word(chip_info->client, SEC_CMD_WAKEUP_GESTURE_MODE, 0xFF9F);
+		if (single_tap_support_b) {
+			touch_i2c_write_word(chip_info->client,
+					     SEC_CMD_WAKEUP_GESTURE_MODE,
+					     0xFFFF);
+		} else {
+			touch_i2c_write_word(chip_info->client,
+					     SEC_CMD_WAKEUP_GESTURE_MODE,
+					     0xFF9F);
+		}
 	}
         for (i = 0; i < 20; i++) {
             touch_i2c_write_byte(chip_info->client, SEC_CMD_SET_POWER_MODE, 0x01);
@@ -163,12 +181,27 @@ static void sec_enable_gesture_mask(void *chip_data, uint32_t enable)
     struct chip_data_s6sy792 *chip_info = (struct chip_data_s6sy792 *)chip_data;
     int ret = -1;
     int i = 0;
+	bool single_tap_support_b = 0;
+	struct touchpanel_data *ts = i2c_get_clientdata(chip_info->client);
 
-    TPD_INFO("%s, enable = %d\n", __func__, enable);
+	if (ts) {
+		single_tap_support_b = ts->single_tap_support;
+	}
+
+	TPD_INFO("%s, enable = %d,single_tap_support_b =%d\n", __func__, enable,
+		 single_tap_support_b);
 
     if (enable) {
         for (i = 0; i < 20; i++) {
-            touch_i2c_write_word(chip_info->client, SEC_CMD_WAKEUP_GESTURE_MODE, 0xFF9F);
+		if (single_tap_support_b) {
+			touch_i2c_write_word(chip_info->client,
+					     SEC_CMD_WAKEUP_GESTURE_MODE,
+					     0xFFFF);
+		} else {
+			touch_i2c_write_word(chip_info->client,
+					     SEC_CMD_WAKEUP_GESTURE_MODE,
+					     0xFF9F);
+		}
             touch_i2c_write_byte(chip_info->client, SEC_CMD_SET_POWER_MODE, 0x01);
             sec_mdelay(10);
             ret = touch_i2c_read_byte(chip_info->client, SEC_CMD_SET_POWER_MODE);
@@ -1490,6 +1523,18 @@ static int sec_get_gesture_info(void *chip_data, struct gesture_info *gesture)
 		gesture->gesture_type  = SingleTap;
 		gesture->Point_start.x = (coord[1] << 8) | coord[0];
 		gesture->Point_start.y = (coord[3] << 8) | coord[2];
+		break;
+
+	case GESTURE_S:
+		gesture->gesture_type  = SGESTRUE;
+		gesture->Point_start.x = (coord[1] << 8) | coord[0];
+		gesture->Point_start.y = (coord[3] << 8) | coord[2];
+		gesture->Point_1st.x   = (coord[5] << 8) | coord[4];
+		gesture->Point_1st.y   = (coord[7] << 8) | coord[6];
+		gesture->Point_2nd.x   = (coord[9] << 8) | coord[8];
+		gesture->Point_2nd.y   = (coord[11] << 8) | coord[10];
+		gesture->Point_end.x   = (coord[13] << 8) | coord[12];
+		gesture->Point_end.y   = (coord[15] << 8) | coord[14];
 		break;
 
 	default:
