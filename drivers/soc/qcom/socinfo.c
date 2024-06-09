@@ -24,6 +24,10 @@
 #include <soc/qcom/boot_stats.h>
 #include <asm/unaligned.h>
 
+#ifdef OPLUS_ARCH_EXTENDS
+#include <soc/oplus/system/oplus_project.h>
+#endif
+
 #define BUILD_ID_LENGTH 32
 #define CHIP_ID_LENGTH 32
 #define SMEM_IMAGE_VERSION_BLOCKS_COUNT 32
@@ -248,6 +252,13 @@ struct socinfo_partinfo partinfo[SOCINFO_PART_MAX_PARTTYPE];
 /* max socinfo format version supported */
 #define MAX_SOCINFO_FORMAT SOCINFO_VERSION(0, 16)
 
+#ifdef OPLUS_ARCH_EXTENDS
+#ifdef CONFIG_ARCH_KONA
+static char *real_cpu_id = "SM8250";
+#endif /* CONFIG_ARCH_KONA */
+static char *real_cpu_id_20161_models = "SM8250_AC";
+#endif /* OPLUS_ARCH_EXTENDS */
+
 static const char * const hw_platform_feature_code[] = {
 	[SOCINFO_FC_UNKNOWN] = "Unknown",
 	[SOCINFO_FC_AA] = "AA",
@@ -450,6 +461,17 @@ static struct msm_soc_info cpu_of_id[] = {
 	 */
 };
 
+#ifdef OPLUS_ARCH_EXTENDS
+static struct msm_soc_info cpu_of_id_op8 = { .generic_soc_type = MSM_CPU_KONA,
+					     .soc_id_string = "SM8250" };
+
+static struct msm_soc_info cpu_of_id_20828 = { .generic_soc_type = MSM_CPU_KONA,
+					       .soc_id_string = "SM8250_AC" };
+
+static struct msm_soc_info cpu_of_id_21615 = { .generic_soc_type = MSM_CPU_KONA,
+					       .soc_id_string = "SM8250_AC" };
+#endif
+
 static enum msm_cpu cur_cpu;
 static int current_image;
 static uint32_t socinfo_format;
@@ -468,6 +490,22 @@ EXPORT_SYMBOL(socinfo_get_id);
 
 char *socinfo_get_id_string(void)
 {
+#ifdef OPLUS_ARCH_EXTENDS
+	if ((get_project() == 19811) || (get_project() == 19821) ||
+	    (get_project() == 19805) || (get_project() == 19855) ||
+	    (get_project() == 20809)) {
+		return cpu_of_id_op8.soc_id_string;
+	}
+	if (get_project() == 20828) {
+		return cpu_of_id_20828.soc_id_string;
+	}
+	if ((get_project() == 21615) || (get_project() == 21619) || 
+		(get_project() == 21623) || (get_project() == 21732) ||
+		(get_project() == 21733) || (get_project() == 0x2161A) ||
+		(get_project() == 0x2169A) || (get_project() == 0x2169B)) {
+		return cpu_of_id_21615.soc_id_string;
+	}
+#endif
 	return (socinfo) ? cpu_of_id[socinfo->v0_1.id].soc_id_string : NULL;
 }
 EXPORT_SYMBOL(socinfo_get_id_string);
@@ -495,8 +533,30 @@ static char *msm_read_hardware_id(void)
 	if (!cpu_of_id[socinfo->v0_1.id].soc_id_string)
 		goto err_path;
 
+#ifdef OPLUS_ARCH_EXTENDS
+	if ((get_project() == 19811) || (get_project() == 19821) ||
+	    (get_project() == 19805) || (get_project() == 19855) ||
+	    (get_project() == 20809)) {
+		ret = strlcat(msm_soc_str, cpu_of_id_op8.soc_id_string,
+			      sizeof(msm_soc_str));
+	} else if (get_project() == 20828) {
+		ret = strlcat(msm_soc_str, cpu_of_id_20828.soc_id_string,
+			      sizeof(msm_soc_str));
+	} else if ((get_project() == 21615) || (get_project() == 21619) ||
+			   (get_project() == 21623) || (get_project() == 21732) ||
+			   (get_project() == 21733) || (get_project() == 0x2161A) ||
+			   (get_project() == 0x2169A) || (get_project() == 0x2169B)) {
+		ret = strlcat(msm_soc_str, cpu_of_id_21615.soc_id_string,
+				sizeof(msm_soc_str));
+	} else {
+		ret = strlcat(msm_soc_str,
+			      cpu_of_id[socinfo->v0_1.id].soc_id_string,
+			      sizeof(msm_soc_str));
+	}
+#else
 	ret = strlcat(msm_soc_str, cpu_of_id[socinfo->v0_1.id].soc_id_string,
 			sizeof(msm_soc_str));
+#endif
 	if (ret > sizeof(msm_soc_str))
 		goto err_path;
 
@@ -2080,6 +2140,16 @@ int __init socinfo_init(void)
 	}
 
 	cur_cpu = cpu_of_id[socinfo->v0_1.id].generic_soc_type;
+#ifdef OPLUS_ARCH_EXTENDS
+	if((get_project() == 20061) || (get_project() == 20161) ||
+	   (get_project() == 20163) || (get_project() == 20351) || 
+	   (get_project() == 21027)) {
+			cpu_of_id[socinfo->v0_1.id].soc_id_string = real_cpu_id_20161_models;
+		}
+		else {
+			cpu_of_id[socinfo->v0_1.id].soc_id_string = real_cpu_id;
+		}
+#endif
 	boot_stats_init();
 	socinfo_print();
 	arch_read_hardware_id = msm_read_hardware_id;
