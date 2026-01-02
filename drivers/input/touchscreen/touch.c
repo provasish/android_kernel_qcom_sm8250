@@ -104,18 +104,6 @@ int tp_util_get_vendor(struct hw_resource *hw_res,
 		memcpy(panel_data->manufacture_info.version, "goodix_", 7);
 		panel_data->manufacture_info.version[7] = '\0';
 	}
-	if (prj_id == 19015 || prj_id == 19016) {
-		memcpy(panel_data->manufacture_info.version, "0xbd3180000", 11);
-		panel_data->manufacture_info.version[11] = '\0';
-	}
-	if (prj_id == 19125) {
-		memcpy(panel_data->manufacture_info.version, "0xbd2830000", 11);
-		panel_data->manufacture_info.version[11] = '\0';
-	}
-	if (prj_id == 20801) {
-		memcpy(panel_data->manufacture_info.version, "0x504000000", 11);
-		panel_data->manufacture_info.version[11] = '\0';
-	}
 	if (prj_id == 21623) {
 		memcpy(panel_data->manufacture_info.version, "focalt_",
 		       sizeof("focalt_"));
@@ -143,36 +131,6 @@ int tp_util_get_vendor(struct hw_resource *hw_res,
 			 vendor);
 	}
 
-	panel_data->manufacture_info.fw_path = panel_data->fw_name;
-
-	if (prj_id == 20669 || prj_id == 20751) {
-		snprintf(panel_data->fw_name, MAX_FW_NAME_LENGTH,
-			 "tp/20669/FW_%s_%s.img", panel_data->chip_name,
-			 vendor);
-
-		if (panel_data->test_limit_name) {
-			snprintf(panel_data->test_limit_name,
-				 MAX_LIMIT_DATA_LENGTH,
-				 "tp/20669/LIMIT_%s_%s.img",
-				 panel_data->chip_name, vendor);
-		}
-		pr_info("panel_data->tp_type = %d\n", panel_data->tp_type);
-		if (panel_data->tp_type == TP_JDI) {
-			memcpy(panel_data->manufacture_info.version,
-			       "AA869_DS_NT_", 12);
-			panel_data->firmware_headfile.firmware_data =
-				FW_17951_NT36672C_JDI;
-			panel_data->firmware_headfile.firmware_size =
-				sizeof(FW_17951_NT36672C_JDI);
-		} else {
-			memcpy(panel_data->manufacture_info.version,
-			       "AA869_BOE_ILI_", 14);
-			panel_data->firmware_headfile.firmware_data =
-				FW_20669_ILI7807S;
-			panel_data->firmware_headfile.firmware_size =
-				sizeof(FW_20669_ILI7807S);
-		}
-	}
 	if (prj_id == 21027) {
 		strcpy(panel_data->manufacture_info.manufacture, "BOE");
 		memcpy(panel_data->manufacture_info.version, "BSFA26105", 9);
@@ -189,19 +147,6 @@ int tp_util_get_vendor(struct hw_resource *hw_res,
 				 MAX_LIMIT_DATA_LENGTH, "tp/%d/LIMIT_%s_%s.img",
 				 prj_id, panel_data->chip_name, vendor);
 		}
-	}
-	if (prj_id == 0x2065C) {
-		snprintf(panel_data->fw_name, MAX_FW_NAME_LENGTH,
-			 "tp/%s/FW_%s_%s.img", "2065C", panel_data->chip_name,
-			 vendor);
-
-		if (panel_data->test_limit_name) {
-			snprintf(panel_data->test_limit_name,
-				 MAX_LIMIT_DATA_LENGTH, "tp/%s/LIMIT_%s_%s.img",
-				 "2065C", panel_data->chip_name, vendor);
-		}
-		memcpy(panel_data->manufacture_info.version, "focalt_0000", 11);
-		panel_data->manufacture_info.fw_path = panel_data->fw_name;
 	}
 
 	pr_info("[TP]vendor:%s fw:%s limit:%s\n", vendor, panel_data->fw_name,
