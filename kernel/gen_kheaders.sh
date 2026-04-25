@@ -14,6 +14,18 @@ include/
 arch/$SRCARCH/include/
 "
 
+copy_headers()
+{
+	if command -v cpio >/dev/null 2>&1; then
+		cpio --quiet -pd "$cpio_dir"
+		return
+	fi
+
+	while IFS= read -r f; do
+		cp -f --parents "$f" "$cpio_dir"
+	done
+}
+
 # Support incremental builds by skipping archive generation
 # if timestamps of files being archived are not changed.
 
@@ -58,14 +70,14 @@ mkdir $cpio_dir
 pushd $srctree > /dev/null
 for f in $dir_list;
 	do find "$f" -name "*.h";
-done | cpio --quiet -pd $cpio_dir
+done | copy_headers
 popd > /dev/null
 
-# The second CPIO can complain if files already exist which can
-# happen with out of tree builds. Just silence CPIO for now.
+# The second copy can complain if files already exist which can
+# happen with out of tree builds. Just silence it for now.
 for f in $dir_list;
 	do find "$f" -name "*.h";
-done | cpio --quiet -pd $cpio_dir >/dev/null 2>&1
+done | copy_headers >/dev/null 2>&1
 
 # Remove comments except SDPX lines
 find $cpio_dir -type f -print0 |
