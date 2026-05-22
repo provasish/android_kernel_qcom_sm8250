@@ -157,12 +157,15 @@
     reg = <0x0 0x94100000 0x0 0x4600000>;
 };
 
-//ifdef OPLUS_BUG_STABILITY
-//add for raising bark-time
+
 &wdog {
+    //ifdef OPLUS_BUG_STABILITY
+    //add for raising bark-time
     qcom,bark-time = <22000>;
+    //endif /*OPLUS_BUG_STABILITY*/
+
+    /delete-property/ qcom,wakeup-enable;
 };
-//endif /*OPLUS_BUG_STABILITY*/
 
 &qcom_seecom {
     reg = <0x82400000 0xb400000>;
