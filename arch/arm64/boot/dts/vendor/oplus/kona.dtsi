@@ -1564,3 +1564,8 @@
                             0x00 0x78>;
 };
 //#endif
+
+// kona-gpu.dtsi
+&msm_gpu {
+    qcom,idle-timeout = <58>; /* msecs */
+};
