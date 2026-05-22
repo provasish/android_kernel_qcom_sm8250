@@ -1567,5 +1567,7 @@
 
 // kona-gpu.dtsi
 &msm_gpu {
+    /delete-property/ qcom,no-nap;
+
     qcom,idle-timeout = <58>; /* msecs */
 };
