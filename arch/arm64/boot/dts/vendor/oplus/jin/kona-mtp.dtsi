@@ -1277,26 +1277,6 @@
 //#endif
 
 &pm8150_gpios {
-	dischg_enable: dischg_enable {
-		pins = "gpio9"; /* GPIO 9 */
-		function = "normal"; /* normal */
-		bias-disable; //No Pull
-		power-source = <0>;//VIN0 3.3
-		output-high; //digital output, no invert
-		qcom,drive-strength = <3>; //LOW strength
-		//drive-push-pull;//CMOS
-	};
-
-	dischg_disable: dischg_disable {
-		pins = "gpio9"; /* GPIO 9 */
-		function = "normal"; /* normal */
-		bias-disable; //No Pull
-		power-source = <0>;//VIN0 3.3
-		output-low; //digital output, no invert
-		qcom,drive-strength = <3>; //LOW strength
-		//drive-push-pull;//CMOS
-	};
-
 	mps_otg_en_active: mps_otg_en_active {
 		pins = "gpio3"; /* GPIO 3 */
 		function = "normal"; /* normal */
